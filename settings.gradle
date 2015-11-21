@@ -1,1 +1,5 @@
 include ':app'
+
+//将android-demo中的baselibrary引入，这样属于非copy-paste方式，这一点需要注意
+include ':baselibrary'
+project(':baselibrary').projectDir=new File(settingsDir,'../android-demo/baselibrary')
