@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.cz_jjq.weather.R;
-import com.example.cz_jjq.weather.model.City;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,9 +34,14 @@ public class MainActivity extends AppCompatActivity {
         btnTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String priData="01|北京,02|上海,03|天津";
-                City city=new City();
-                city.inputCityString(priData);
+
+                SelectCityActivity.startAction(MainActivity.this,"","");
+
+                //City city=new City();
+                //city.inputCityString(priData);
+
+                //
+                //WeatherHttpUtil.getInstance().getAllCity();
             }
         });
     }
