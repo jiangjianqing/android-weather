@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.cz_jjq.weather.R;
+import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                SelectCityActivity.startAction(MainActivity.this,"","");
+                WeatherHttpUtil.getInstance().getWeatherData("101190404");
+
+                //SelectCityActivity.startAction(MainActivity.this,"","");
 
                 //City city=new City();
                 //city.inputCityString(priData);

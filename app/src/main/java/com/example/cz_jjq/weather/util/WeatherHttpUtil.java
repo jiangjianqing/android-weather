@@ -39,6 +39,10 @@ public class WeatherHttpUtil {
         return String.format("http://www.weather.com.cn/data/list3/city%s.xml",parent_code);
     }
 
+    private String getWeatherDataUrl(String weather_code){
+        return String.format("http://www.weather.com.cn/data/cityinfo/%s.html",weather_code);
+    }
+
     public void getCityData(final String parent_code){
         HttpCallbackListener listener=new HttpCallbackListener() {
             @Override
@@ -57,6 +61,20 @@ public class WeatherHttpUtil {
             }
         };
         httpUtil.sendSyncHttpRequest(getCityDataUrl(parent_code), listener);//使用同步模式获取数据
+    }
+
+    public void getWeatherData(final String weather_code){
+        httpUtil.sendAsyncHttpRequest(getWeatherDataUrl(weather_code), new HttpCallbackListener() {
+            @Override
+            public void onFinish(String response) {
+                LogUtil.d("WeatherHttpUtil",response);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                LogUtil.d("WeatherHttpUtil",e.toString());
+            }
+        });
     }
 
     private void processCityString(String parent_code,String cityData){
