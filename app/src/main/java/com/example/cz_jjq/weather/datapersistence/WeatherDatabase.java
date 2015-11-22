@@ -47,12 +47,12 @@ public class WeatherDatabase {
 
         private  String CREATE_TABLE_CITY="create table "+CITY_TABLE+"("
                 +"id integer primary key autoincrement"
-                +",parent_id integer"
+                +",parent_code text"
                 +",code text"
                 +",name text"
                 +")";
 
-        private  String CREATE_INDEX_CITY="create index city_index on "+CITY_TABLE+"(parent_id)";
+        private  String CREATE_INDEX_CITY="create index city_parent_code_index on "+CITY_TABLE+"(parent_code)";
 
         public CitySQLiteOpenHelper(int version) {
             super(MyApplication.getContext(), DB_NAME, null, version);
