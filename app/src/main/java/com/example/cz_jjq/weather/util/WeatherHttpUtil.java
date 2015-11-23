@@ -7,6 +7,8 @@ import com.example.cz_jjq.weather.listener.WeatherInfoListener;
 import com.example.cz_jjq.weather.model.WeatherInfo;
 import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -80,6 +82,9 @@ public class WeatherHttpUtil {
                     String json = matcher.group(1);
                     Gson gson = new Gson();
                     WeatherInfo weatherInfo = gson.fromJson(json, WeatherInfo.class);
+
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                    weatherInfo.setPdate(format.format(new Date()));
                     LogUtil.d("WeatherHttpUtil", String.format("weather.city=%s,weather.cityid=%s,temp1=%s,temp2=%s"
                             , weatherInfo.getCity()
                             , weatherInfo.getCityid()

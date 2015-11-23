@@ -1,9 +1,11 @@
 package com.example.cz_jjq.weather.model;
 
+import java.io.Serializable;
+
 /**
  * Created by ztxs on 15-11-23.
  */
-public class WeatherInfo {
+public class WeatherInfo implements Serializable {
     private String city;
     private String cityid;
     private String temp1;
@@ -12,6 +14,8 @@ public class WeatherInfo {
     private String img1;
     private String img2;
     private String ptime;
+
+    private String pdate;
 
     public String getCity() {
         return city;
@@ -75,5 +79,13 @@ public class WeatherInfo {
 
     public void setPtime(String ptime) {
         this.ptime = ptime;
+    }
+
+    public String getPdate() {
+        return pdate;
+    }
+
+    public void setPdate(String pdate) {
+        this.pdate = pdate;
     }
 }

@@ -3,7 +3,6 @@ package com.example.cz_jjq.weather.activity;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,7 +11,6 @@ import android.widget.Button;
 
 import com.example.cz_jjq.baselibrary.activity.BaseActivity;
 import com.example.cz_jjq.weather.R;
-import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 
 public class MainActivity extends BaseActivity {
 
@@ -37,7 +35,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                WeatherActivity.startAction(MainActivity.this,"101190404");
+                WeatherActivity.startAction(MainActivity.this,"101191101");
                 //WeatherHttpUtil.getInstance().getWeatherData("101190404");
 
                 //SelectCityActivity.startAction(MainActivity.this,"","");
