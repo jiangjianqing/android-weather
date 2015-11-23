@@ -10,10 +10,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.cz_jjq.baselibrary.activity.BaseActivity;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

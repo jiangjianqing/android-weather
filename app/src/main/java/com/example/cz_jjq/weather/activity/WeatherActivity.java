@@ -11,12 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.cz_jjq.baselibrary.activity.BaseActivity;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.listener.WeatherInfoListener;
 import com.example.cz_jjq.weather.model.WeatherInfo;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends BaseActivity {
 
     private class DownloadWeatherInfoTask extends AsyncTask<String,Integer,WeatherInfo> implements WeatherInfoListener {
 

@@ -9,9 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.example.cz_jjq.baselibrary.activity.BaseActivity;
 import com.example.cz_jjq.weather.R;
 
-public class SelectCityActivity extends AppCompatActivity {
+public class SelectCityActivity extends BaseActivity {
 
     public static void startAction(Context context, String param1, String param2){
         Intent intent=new Intent(context,SelectCityActivity.class);
