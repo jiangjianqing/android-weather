@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                WeatherHttpUtil.getInstance().getWeatherData("101190404");
+                WeatherActivity.startAction(MainActivity.this,"101190404");
+                //WeatherHttpUtil.getInstance().getWeatherData("101190404");
 
                 //SelectCityActivity.startAction(MainActivity.this,"","");
 
