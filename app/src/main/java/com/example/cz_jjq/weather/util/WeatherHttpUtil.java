@@ -46,7 +46,7 @@ public class WeatherHttpUtil {
         return String.format("http://www.weather.com.cn/data/list3/city%s.xml",parent_code);
     }
 
-    private String getWeatherDataUrl(String cityid){
+    public String getWeatherDataUrl(String cityid){
         return String.format("http://www.weather.com.cn/data/cityinfo/%s.html",cityid);
     }
 
@@ -70,30 +70,34 @@ public class WeatherHttpUtil {
         httpUtil.sendSyncHttpRequest(getCityDataUrl(parent_code), listener);//使用同步模式获取数据
     }
 
+    public WeatherInfo getWeatherInfo(String responseString){
+        WeatherInfo weatherInfo=null;
+        Pattern pattern = Pattern.compile("^\\{\"weatherinfo\":(.*)\\}$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+        Matcher matcher = pattern.matcher(responseString);
+        if (matcher.find()) {
+            LogUtil.d("WeatherHttpUtil", matcher.group(1));
+            String json = matcher.group(1);
+            Gson gson = new Gson();
+            weatherInfo = gson.fromJson(json, WeatherInfo.class);
+
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            weatherInfo.setPdate(format.format(new Date()));
+            LogUtil.d("WeatherHttpUtil", String.format("weather.city=%s,weather.cityid=%s,temp1=%s,temp2=%s"
+                    , weatherInfo.getCity()
+                    , weatherInfo.getCityid()
+                    , weatherInfo.getTemp1()
+                    , weatherInfo.getTemp2()
+            ));
+        }
+        return weatherInfo;
+    }
+
     public void getWeatherData(final String cityid,final WeatherInfoListener weatherInfoListener){
         httpUtil.sendSyncHttpRequest(getWeatherDataUrl(cityid), new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
                 LogUtil.d("WeatherHttpUtil", response);
-                Pattern pattern = Pattern.compile("^\\{\"weatherinfo\":(.*)\\}$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-                Matcher matcher = pattern.matcher(response);
-                if (matcher.find()) {
-                    LogUtil.d("WeatherHttpUtil", matcher.group(1));
-                    String json = matcher.group(1);
-                    Gson gson = new Gson();
-                    WeatherInfo weatherInfo = gson.fromJson(json, WeatherInfo.class);
-
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                    weatherInfo.setPdate(format.format(new Date()));
-                    LogUtil.d("WeatherHttpUtil", String.format("weather.city=%s,weather.cityid=%s,temp1=%s,temp2=%s"
-                            , weatherInfo.getCity()
-                            , weatherInfo.getCityid()
-                            , weatherInfo.getTemp1()
-                            , weatherInfo.getTemp2()
-                    ));
-                    weatherInfoListener.onReceive(weatherInfo);
-                }
-
+                weatherInfoListener.onReceive(getWeatherInfo(response));
             }
 
             @Override

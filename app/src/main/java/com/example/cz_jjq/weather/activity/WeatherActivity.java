@@ -21,9 +21,14 @@ import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.listener.WeatherInfoListener;
 import com.example.cz_jjq.weather.model.WeatherInfo;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.TextHttpResponseHandler;
+
+import cz.msebera.android.httpclient.Header;
 
 public class WeatherActivity extends BaseActivity {
 
+    private String current_cityid;
     private LinearLayout weatherInfoLayout;
     private TextView publishText;
 
@@ -92,7 +97,8 @@ public class WeatherActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                refreshWeatherInfo(current_cityid);
+                Snackbar.make(view, "正在刷新天气数据", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -108,7 +114,11 @@ public class WeatherActivity extends BaseActivity {
 
         Intent intent=getIntent();
         String cityid=intent.getStringExtra("cityid");
-        refreshWeatherInfo(cityid);
+        current_cityid=cityid;
+
+        boolean isFromNotification=intent.getBooleanExtra("fromNotification",false);
+        if(isFromNotification==false)
+            refreshWeatherInfo(cityid);
     }
 
     private void refreshWeatherInfo(String cityid){
@@ -117,7 +127,23 @@ public class WeatherActivity extends BaseActivity {
         publishText.setText("同步中...");
         publishText.setVisibility(View.VISIBLE);
 
-        new DownloadWeatherInfoTask().execute(cityid);
+        //new DownloadWeatherInfoTask().execute(cityid);
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(WeatherHttpUtil.getInstance().getWeatherDataUrl(cityid), new TextHttpResponseHandler() {
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                WeatherInfo weatherInfo=WeatherHttpUtil.getInstance().getWeatherInfo(responseString);
+                if (weatherInfo!=null)
+                    showWeatherInfo(weatherInfo);
+            }
+        });
     }
 
     protected void showWeatherInfo(WeatherInfo weatherInfo){
@@ -140,8 +166,10 @@ public class WeatherActivity extends BaseActivity {
         //underlying deprecated
         //Notification notification = new Notification(R.drawable.ic_launcher, "This is ticker text", System.currentTimeMillis());
         //notification.setLatestEventInfo(this, "This is content title","This is content text", null);
-        Intent intent2=new Intent("my.android.receiver.FORCE_OFFLINE");
-        PendingIntent pi=PendingIntent.getBroadcast(this, 0, intent2, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent intent2=new Intent("cz_jjq.weatherinfo.show");
+        intent2.putExtra("cityid",current_cityid);
+        intent2.putExtra("fromNotification",true);
+        PendingIntent pi=PendingIntent.getActivity(this, 0, intent2, PendingIntent.FLAG_CANCEL_CURRENT);
         //PendingIntent.getService(...)//调用Service
         //PendingIntent.getActivities(...)//调用Activitiy
         //PendingIntent.getBroadcast(...)//调用Broadcast
