@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cz_jjq.baselibrary.activity.BaseActivity;
+import com.example.cz_jjq.baselibrary.util.LogUtil;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.listener.WeatherInfoListener;
 import com.example.cz_jjq.weather.model.WeatherInfo;
@@ -166,7 +167,11 @@ public class WeatherActivity extends BaseActivity {
         //underlying deprecated
         //Notification notification = new Notification(R.drawable.ic_launcher, "This is ticker text", System.currentTimeMillis());
         //notification.setLatestEventInfo(this, "This is content title","This is content text", null);
-        Intent intent2=new Intent("cz_jjq.weatherinfo.show");
+
+        //将intent action放在string resource中
+        String action=this.getResources().getString(R.string.intent_action_weatheractivity_start);
+        LogUtil.d("WeatherActivity",String.format("启动action  %s",action));
+        Intent intent2=new Intent(action);
         intent2.putExtra("cityid",current_cityid);
         intent2.putExtra("fromNotification",true);
         PendingIntent pi=PendingIntent.getActivity(this, 0, intent2, PendingIntent.FLAG_CANCEL_CURRENT);
