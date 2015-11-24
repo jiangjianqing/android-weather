@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cz_jjq.baselibrary.activity.BaseActivity;
+import com.example.cz_jjq.baselibrary.util.FileUtil;
 import com.example.cz_jjq.baselibrary.util.LogUtil;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.listener.WeatherInfoListener;
@@ -120,6 +121,12 @@ public class WeatherActivity extends BaseActivity {
         boolean isFromNotification=intent.getBooleanExtra("fromNotification",false);
         if(isFromNotification==false)
             refreshWeatherInfo(cityid);
+        else{
+            WeatherInfo weatherInfo=FileUtil.loadObjFromFile(WeatherActivity.this,"current_weatherinfo.dat",WeatherInfo.class);
+            if(weatherInfo!=null){
+                showWeatherInfo(weatherInfo);
+            }
+        }
     }
 
     private void refreshWeatherInfo(String cityid){
@@ -141,15 +148,16 @@ public class WeatherActivity extends BaseActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
                 WeatherInfo weatherInfo=WeatherHttpUtil.getInstance().getWeatherInfo(responseString);
-                if (weatherInfo!=null)
+                if (weatherInfo!=null) {
+                    FileUtil.SaveObjToFile(WeatherActivity.this,weatherInfo,"current_weatherinfo.dat");
                     showWeatherInfo(weatherInfo);
+                    showNotification(weatherInfo);
+                }
             }
         });
     }
 
     protected void showWeatherInfo(WeatherInfo weatherInfo){
-
-        showNotification(weatherInfo);
 
         cityNameText.setText(weatherInfo.getCity());
         weatherDespText.setText(weatherInfo.getWeather());
@@ -179,7 +187,7 @@ public class WeatherActivity extends BaseActivity {
         //PendingIntent.getActivities(...)//调用Activitiy
         //PendingIntent.getBroadcast(...)//调用Broadcast
         Notification.Builder builder=new Notification.Builder(this);
-        builder.setTicker("this is ticker info")
+        builder.setTicker("收到最新的天气信息")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(String.format("%s   %s",weatherInfo.getCity(),weatherInfo.getWeather()))
                 .setContentInfo(weatherInfo.getPdate())
