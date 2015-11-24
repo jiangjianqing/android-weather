@@ -3,30 +3,29 @@ package com.example.cz_jjq.weather.activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.cz_jjq.baselibrary.activity.BaseActivity;
 import com.example.cz_jjq.baselibrary.util.FileUtil;
 import com.example.cz_jjq.baselibrary.util.LogUtil;
 import com.example.cz_jjq.weather.R;
-import com.example.cz_jjq.weather.listener.WeatherInfoListener;
+import com.example.cz_jjq.weather.datapersistence.WeatherDatabase;
 import com.example.cz_jjq.weather.model.WeatherInfo;
+import com.example.cz_jjq.weather.service.WeatherService;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.TextHttpResponseHandler;
-
-import cz.msebera.android.httpclient.Header;
 
 public class WeatherActivity extends BaseActivity {
 
@@ -52,6 +51,8 @@ public class WeatherActivity extends BaseActivity {
      * 用于显示当前日期
      */
     private TextView currentDateText;
+
+    /** AsyncTask 用于获取Weather的范例
 
     private class DownloadWeatherInfoTask extends AsyncTask<String,Integer,WeatherInfo> implements WeatherInfoListener {
 
@@ -81,10 +82,49 @@ public class WeatherActivity extends BaseActivity {
 
         }
     }
+     */
+    private WeatherService.DownloadBinder downloadBinder;
+    private boolean isFromNotification;
+
+    private ServiceConnection weatherServiceConnection =new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            downloadBinder=(WeatherService.DownloadBinder)service;
+
+            if(isFromNotification==false) {
+                downloadBinder.downloadWeather(current_cityid, downloadListener);
+            }else {
+                WeatherInfo weatherInfo=FileUtil.loadObjFromFile(WeatherActivity.this,"current_weatherinfo.dat",WeatherInfo.class);
+                showWeatherInfo(weatherInfo);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+    private WeatherService.DownloadListener downloadListener=new WeatherService.DownloadListener() {
+        @Override
+        public void downloadWeatherOk(String cityId) {
+            String weatherString=WeatherDatabase.getInstance().queryWeatherInfo(cityId);
+            if(!TextUtils.isEmpty(weatherString)){
+                WeatherInfo weatherInfo=WeatherHttpUtil.getInstance().getWeatherInfo(weatherString);
+                showWeatherInfo(weatherInfo);
+                if(!isFromNotification){
+                    FileUtil.SaveObjToFile(WeatherActivity.this, weatherInfo, "current_weatherinfo.dat");
+                    showNotification(weatherInfo);
+                }
+            }
+        }
+    };
+
+
 
     public static void startAction(Context context,String cityid){
         Intent intent=new Intent(context,WeatherActivity.class);
-        intent.putExtra("cityid",cityid);
+        intent.putExtra("cityid", cityid);
         context.startActivity(intent);
     }
 
@@ -99,7 +139,8 @@ public class WeatherActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                refreshWeatherInfo(current_cityid);
+                //refreshWeatherInfo(current_cityid);
+                downloadBinder.downloadWeather(current_cityid,downloadListener);
                 Snackbar.make(view, "正在刷新天气数据", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -118,43 +159,38 @@ public class WeatherActivity extends BaseActivity {
         String cityid=intent.getStringExtra("cityid");
         current_cityid=cityid;
 
-        boolean isFromNotification=intent.getBooleanExtra("fromNotification",false);
-        if(isFromNotification==false)
+        isFromNotification=intent.getBooleanExtra("fromNotification",false);
+
+
+        if(isFromNotification==false) {
+            weatherInfoLayout.setVisibility(View.INVISIBLE);
+            publishText.setText("同步中...");
+            publishText.setVisibility(View.VISIBLE);
+        }
+        //由于改用Service，而其IBinder是异步获取的，所以这里不能执行任何代码
+        /**
+        if(isFromNotification==true)
             refreshWeatherInfo(cityid);
         else{
+
+            //downloadBinder.downloadWeather(cityid);
+
             WeatherInfo weatherInfo=FileUtil.loadObjFromFile(WeatherActivity.this,"current_weatherinfo.dat",WeatherInfo.class);
             if(weatherInfo!=null){
                 showWeatherInfo(weatherInfo);
             }
-        }
+        }*/
+
+        //importnent::使用bindService则必须在最后进行初始化，以防止ServiceConnection中使用了未初始化的变量
+        Intent serviceIntent=new Intent(WeatherActivity.this,WeatherService.class);
+        bindService(serviceIntent, weatherServiceConnection, BIND_AUTO_CREATE);
+
     }
 
-    private void refreshWeatherInfo(String cityid){
-        weatherInfoLayout.setVisibility(View.INVISIBLE);
-
-        publishText.setText("同步中...");
-        publishText.setVisibility(View.VISIBLE);
-
-        //new DownloadWeatherInfoTask().execute(cityid);
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(WeatherHttpUtil.getInstance().getWeatherDataUrl(cityid), new TextHttpResponseHandler() {
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                WeatherInfo weatherInfo=WeatherHttpUtil.getInstance().getWeatherInfo(responseString);
-                if (weatherInfo!=null) {
-                    FileUtil.SaveObjToFile(WeatherActivity.this,weatherInfo,"current_weatherinfo.dat");
-                    showWeatherInfo(weatherInfo);
-                    showNotification(weatherInfo);
-                }
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        unbindService(weatherServiceConnection);
+        super.onDestroy();
     }
 
     protected void showWeatherInfo(WeatherInfo weatherInfo){
