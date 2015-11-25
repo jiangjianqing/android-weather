@@ -9,12 +9,15 @@ import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.cz_jjq.baselibrary.activity.BaseActivity;
+import com.example.cz_jjq.baselibrary.util.LogUtil;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.model.CityListContent;
 import com.example.cz_jjq.weather.service.CityService;
@@ -48,6 +51,7 @@ public class SelectCityActivity extends BaseActivity {
         @Override
         public void findCityId(String cityId) {
             WeatherActivity.startAction(SelectCityActivity.this,cityId);
+            finish();
         }
     };
     public ServiceConnection cityServiceConnection=new ServiceConnection() {
@@ -55,7 +59,7 @@ public class SelectCityActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             downloadCityBinder=(CityService.DownloadCityBinder)service;
 
-            downloadCityBinder.downloadCity("",downloadCityListener);
+            downloadCity("",true);
         }
 
         @Override
@@ -64,9 +68,16 @@ public class SelectCityActivity extends BaseActivity {
         }
     };
 
-    private Stack<CityListContent.CityItem> cityStack=new Stack<>();
+    private Stack<String> cityStack=new Stack<>();
     private ArrayAdapter<CityListContent.CityItem> cityItemArrayAdapter;
     private ListView cityListView;
+
+    private void downloadCity(String cityId,boolean pushInStack){
+        if(pushInStack){
+            cityStack.push(cityId);
+        }
+        downloadCityBinder.downloadCity(cityId, downloadCityListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,13 +102,13 @@ public class SelectCityActivity extends BaseActivity {
         cityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                CityListContent.CityItem city=CityListContent.ITEMS.get(position);
-                downloadCityBinder.downloadCity(city.code,downloadCityListener);
+                CityListContent.CityItem city = CityListContent.ITEMS.get(position);
+                downloadCity(city.code,true);
             }
         });
 
         Intent serviceIntent=new Intent(SelectCityActivity.this,CityService.class);
-        bindService(serviceIntent,cityServiceConnection,BIND_AUTO_CREATE);
+        bindService(serviceIntent, cityServiceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -106,5 +117,16 @@ public class SelectCityActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(cityServiceConnection);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(cityStack.size()>0){
+            String cityId=cityStack.pop();
+            LogUtil.d("SelectCityActivity", String.format(" cityId=%s", cityId));
+            downloadCity(cityId,false);
+        }else {
+            super.onBackPressed();
+        }
     }
 }
