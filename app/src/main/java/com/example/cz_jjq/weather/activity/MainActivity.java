@@ -35,7 +35,10 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                WeatherActivity.startAction(MainActivity.this,"101191101");
+                SelectCityActivity.startAction(MainActivity.this);
+                //WeatherActivity.startAction(MainActivity.this,"101191101");
+
+
                 //WeatherHttpUtil.getInstance().getWeatherData("101190404");
 
                 //SelectCityActivity.startAction(MainActivity.this,"","");

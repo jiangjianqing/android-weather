@@ -42,7 +42,7 @@ public class WeatherHttpUtil {
 
     }
 
-    private String getCityDataUrl(String parent_code){
+    public String getCityDataUrl(String parent_code){
         return String.format("http://www.weather.com.cn/data/list3/city%s.xml",parent_code);
     }
 
@@ -127,7 +127,7 @@ public class WeatherHttpUtil {
         }
     }
 
-    private Map<String,String> splitCityData(String data){
+    public Map<String,String> splitCityData(String data){
         //数据格式为 "01|北京,02|上海,03|天津";
         Map<String,String> map=new HashMap<>();
         String[] itemList=data.split(",");
@@ -136,5 +136,18 @@ public class WeatherHttpUtil {
             map.put(pair[0], pair[1]);
         }
         return map;
+    }
+
+    public boolean isCityIdData(Map<String,String> map){
+        boolean ret=false;
+        if (map!=null&&map.size()==1){
+            //如果name全是数字，则认为是cityid数据
+            for(Map.Entry<String,String> entry:map.entrySet()){
+                Pattern pattern=Pattern.compile("[0-9]+");
+                if(pattern.matcher(entry.getValue()).matches())
+                    ret=true;
+            }
+        }
+        return ret;
     }
 }

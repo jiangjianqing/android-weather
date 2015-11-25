@@ -13,4 +13,11 @@
     tools:context="com.example.cz_jjq.weather.activity.SelectCityActivity"
     tools:showIn="@layout/activity_select_city">
 
+    <ListView
+        android:id="@+id/city_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ListView>
+
 </RelativeLayout>
