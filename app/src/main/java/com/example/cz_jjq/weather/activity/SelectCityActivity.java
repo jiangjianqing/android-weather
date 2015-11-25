@@ -9,8 +9,6 @@ import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,8 +20,6 @@ import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.model.CityListContent;
 import com.example.cz_jjq.weather.service.CityService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -59,7 +55,7 @@ public class SelectCityActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             downloadCityBinder=(CityService.DownloadCityBinder)service;
 
-            downloadCity("",true);
+            downloadCity("");
         }
 
         @Override
@@ -72,10 +68,8 @@ public class SelectCityActivity extends BaseActivity {
     private ArrayAdapter<CityListContent.CityItem> cityItemArrayAdapter;
     private ListView cityListView;
 
-    private void downloadCity(String cityId,boolean pushInStack){
-        if(pushInStack){
-            cityStack.push(cityId);
-        }
+    private void downloadCity(String cityId){
+        cityStack.push(cityId);
         downloadCityBinder.downloadCity(cityId, downloadCityListener);
     }
 
@@ -95,6 +89,8 @@ public class SelectCityActivity extends BaseActivity {
             }
         });
 
+        CityListContent.clear();//将上次查看的数据clear
+
         cityItemArrayAdapter=new ArrayAdapter<CityListContent.CityItem>(SelectCityActivity.this
                 ,android.R.layout.simple_list_item_1,CityListContent.ITEMS);
         cityListView=(ListView)findViewById(R.id.city_list);
@@ -103,7 +99,7 @@ public class SelectCityActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 CityListContent.CityItem city = CityListContent.ITEMS.get(position);
-                downloadCity(city.code,true);
+                downloadCity(city.code);
             }
         });
 
@@ -121,10 +117,11 @@ public class SelectCityActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        cityStack.pop();//将当前城市弹出Stack
         if(cityStack.size()>0){
-            String cityId=cityStack.pop();
-            LogUtil.d("SelectCityActivity", String.format(" cityId=%s", cityId));
-            downloadCity(cityId,false);
+            String cityId=cityStack.pop();//获取上一个cityid
+            LogUtil.d("SelectCityActivity", String.format(" pop from stack cityId=%s", cityId));
+            downloadCity(cityId);
         }else {
             super.onBackPressed();
         }
