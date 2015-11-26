@@ -50,6 +50,18 @@ public class WeatherHttpUtil {
         return String.format("http://www.weather.com.cn/data/cityinfo/%s.html",cityid);
     }
 
+    public String getYahooWeatherDataUrl(String woeid){
+        //常州.woeid=2137085
+        return String.format("https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid=%s and u='c'&format=xml",woeid);
+
+        //根据经纬度查询的地址
+        //http://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.placefinder where text='22.50508166666666666667,113.92853333333333333333' and gflags = 'R') and u='c'&format=xml&diagnostics=true&callback=
+    }
+
+    public String getYahooWoeidDataUrl(String cityname){
+        return String.format("https://query.yahooapis.com/v1/public/yql?q=select * from geo.placefinder where text='%s'&format=xml",cityname);
+    }
+
     public void getCityData(final String parent_code){
         HttpCallbackListener listener=new HttpCallbackListener() {
             @Override
