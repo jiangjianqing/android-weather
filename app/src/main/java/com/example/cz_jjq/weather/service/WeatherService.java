@@ -6,7 +6,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.example.cz_jjq.weather.datapersistence.WeatherDatabase;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -18,6 +17,8 @@ import cz.msebera.android.httpclient.Header;
  */
 public class WeatherService extends Service {
 
+    private AsyncHttpClient client=new AsyncHttpClient();
+
     public interface DownloadListener{
         void downloadWeatherOk(String cityId);
     }
@@ -25,9 +26,8 @@ public class WeatherService extends Service {
     public class DownloadBinder extends Binder{
 
         public void downloadWeather(final String cityId,final DownloadListener listener){
-            AsyncHttpClient client = new AsyncHttpClient();
+            //AsyncHttpClient client = new AsyncHttpClient();
             client.get(WeatherHttpUtil.getInstance().getWeatherDataUrl(cityId), new TextHttpResponseHandler() {
-
                 @Override
                 public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
@@ -35,8 +35,8 @@ public class WeatherService extends Service {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    WeatherDatabase.getInstance().insertWeatherInfo(cityId,responseString);
-                    listener.downloadWeatherOk(cityId);
+                    //WeatherDatabase.getInstance().insertWeatherInfo(cityId,responseString);
+                    //listener.downloadWeatherOk(cityId);
                 }
             });
 
