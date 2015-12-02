@@ -6,4 +6,6 @@
 
 
     <string name="intent_action_weatheractivity_start">com.example.cz_jjq.weather.activity.WeatherActivity.ACTION_START</string>
+    <string name="intent_action_yahoo_weatheractivity_start">com.example.cz_jjq.weather.activity.YahooWeatherActivity.ACTION_START</string>
+    <string name="title_activity_yahoo_weather">YahooWeatherActivity</string>
 </resources>

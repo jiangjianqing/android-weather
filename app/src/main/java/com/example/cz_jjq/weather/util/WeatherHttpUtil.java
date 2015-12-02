@@ -1,12 +1,20 @@
 package com.example.cz_jjq.weather.util;
 
+import android.util.Xml;
+
 import com.example.cz_jjq.baselibrary.util.HttpCallbackListener;
 import com.example.cz_jjq.baselibrary.util.HttpUtil;
 import com.example.cz_jjq.baselibrary.util.LogUtil;
 import com.example.cz_jjq.weather.listener.WeatherInfoListener;
 import com.example.cz_jjq.weather.model.WeatherInfo;
+import com.example.cz_jjq.weather.model.YahooWeatherContent;
 import com.google.gson.Gson;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -159,6 +167,61 @@ public class WeatherHttpUtil {
                 if(pattern.matcher(entry.getValue()).matches())
                     ret=true;
             }
+        }
+        return ret;
+    }
+
+    public boolean getYahooWeatherInfo(String xml){
+        boolean ret=false;
+        YahooWeatherContent.clear();
+        XmlPullParser parser = Xml.newPullParser();//得到Pull解析器
+        ByteArrayInputStream stream = new ByteArrayInputStream(xml.getBytes());
+        try {
+            parser.setInput(stream, "UTF-8");
+
+            int eventType=parser.getEventType();
+            while(eventType!=XmlPullParser.END_DOCUMENT){
+                String tagName=parser.getName();
+                switch(eventType){
+                    case XmlPullParser.START_DOCUMENT:
+                        //books = new ArrayList<Book>();
+                        break;
+                    case XmlPullParser.START_TAG:
+                        if (tagName.equals("forecast")) {
+                            //Integer code=Integer.parseInt(parser.getAttributeValue(null,"code"));
+                            String code=parser.getAttributeValue(null,"code");
+                            String date=parser.getAttributeValue(null,"date");
+                            String day=parser.getAttributeValue(null,"day");
+                            String high=parser.getAttributeValue(null,"high");
+                            String low=parser.getAttributeValue(null,"low");
+                            String text=parser.getAttributeValue(null,"text");
+                            YahooWeatherContent.addItem(new YahooWeatherContent.YahooWeatherItem(code,date,day,high,low,text));
+                            //book = new Book();
+                        } else if (tagName.equals("id")) {
+                            //eventType = parser.next();
+                            //book.setId(Integer.parseInt(parser.getText()));
+                        } else if (tagName.equals("name")) {
+                            //eventType = parser.next();
+                            //book.setName(parser.getText());
+                        } else if (tagName.equals("price")) {
+                            //eventType = parser.next();
+                            //book.setPrice(Float.parseFloat(parser.getText()));
+                        }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        if (tagName.equals("book")) {
+                            //books.add(book);
+                            //book = null;
+                        }
+                        break;
+                }
+                eventType=parser.next();
+            }
+            ret=true;
+        } catch (XmlPullParserException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
         return ret;
     }
