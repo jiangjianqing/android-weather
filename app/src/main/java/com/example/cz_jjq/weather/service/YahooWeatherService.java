@@ -6,9 +6,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.example.cz_jjq.weather.model.YahooWeatherContent;
 import com.example.cz_jjq.weather.util.WeatherHttpUtil;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
+
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -19,7 +22,7 @@ public class YahooWeatherService extends Service {
     private AsyncHttpClient client=new AsyncHttpClient();
 
     public interface DownloadListener{
-        void downloadOk();
+        void downloadOk(List<YahooWeatherContent.YahooWeatherItem> list);
     }
 
     public class DownloadBinder extends Binder {
@@ -34,10 +37,8 @@ public class YahooWeatherService extends Service {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
                     //LogUtil.d("YahooWeatherService",responseString);
-                    if (WeatherHttpUtil.getInstance().getYahooWeatherInfo(responseString))
-                    {
-                        listener.downloadOk();
-                    }
+                    List<YahooWeatherContent.YahooWeatherItem> list=WeatherHttpUtil.getInstance().getYahooWeatherInfo(responseString);
+                    listener.downloadOk(list);
                     //WeatherDatabase.getInstance().insertWeatherInfo(cityId,responseString);
                     //listener.downloadWeatherOk(cityId);
                 }

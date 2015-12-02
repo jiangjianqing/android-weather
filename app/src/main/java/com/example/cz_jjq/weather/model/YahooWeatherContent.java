@@ -2,6 +2,7 @@ package com.example.cz_jjq.weather.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -9,17 +10,22 @@ import java.util.List;
  */
 public class YahooWeatherContent implements Serializable {
 
-    public static List<YahooWeatherItem> ITEMS=new ArrayList<>();
+    public List<YahooWeatherItem> ITEMS=new ArrayList<>();
 
-    public static void addItem(YahooWeatherItem item){
+    public void addItem(YahooWeatherItem item){
         ITEMS.add(item);
     }
 
-    public static void clear(){
+    public void clear(){
         ITEMS.clear();
     }
 
-    public static class YahooWeatherItem{
+    public void setList(Collection<YahooWeatherItem> collection){
+        ITEMS.clear();
+        ITEMS.addAll(collection);
+    }
+
+    public static class YahooWeatherItem implements Serializable{
         public String code;
         public String date;
         public String day;

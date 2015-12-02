@@ -16,8 +16,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,9 +173,8 @@ public class WeatherHttpUtil {
         return ret;
     }
 
-    public boolean getYahooWeatherInfo(String xml){
-        boolean ret=false;
-        YahooWeatherContent.clear();
+    public List<YahooWeatherContent.YahooWeatherItem> getYahooWeatherInfo(String xml){
+        List<YahooWeatherContent.YahooWeatherItem> list=new ArrayList<>();
         XmlPullParser parser = Xml.newPullParser();//得到Pull解析器
         ByteArrayInputStream stream = new ByteArrayInputStream(xml.getBytes());
         try {
@@ -194,8 +195,8 @@ public class WeatherHttpUtil {
                             String day=parser.getAttributeValue(null,"day");
                             String high=parser.getAttributeValue(null,"high");
                             String low=parser.getAttributeValue(null,"low");
-                            String text=parser.getAttributeValue(null,"text");
-                            YahooWeatherContent.addItem(new YahooWeatherContent.YahooWeatherItem(code,date,day,high,low,text));
+                            String text=parser.getAttributeValue(null, "text");
+                            list.add(new YahooWeatherContent.YahooWeatherItem(code,date,day,high,low,text));
                             //book = new Book();
                         } else if (tagName.equals("id")) {
                             //eventType = parser.next();
@@ -217,12 +218,11 @@ public class WeatherHttpUtil {
                 }
                 eventType=parser.next();
             }
-            ret=true;
         } catch (XmlPullParserException e1) {
             e1.printStackTrace();
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        return ret;
+        return list;
     }
 }

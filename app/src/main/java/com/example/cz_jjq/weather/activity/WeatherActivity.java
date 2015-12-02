@@ -113,7 +113,7 @@ public class WeatherActivity extends BaseActivity {
                 WeatherInfo weatherInfo=WeatherHttpUtil.getInstance().getWeatherInfo(weatherString);
                 showWeatherInfo(weatherInfo);
                 if(!isFromNotification){
-                    FileUtil.SaveObjToFile(WeatherActivity.this, weatherInfo, "current_weatherinfo.dat");
+                    FileUtil.saveObjToFile(WeatherActivity.this, weatherInfo, "current_weatherinfo.dat");
                     showNotification(weatherInfo);
                 }
             }

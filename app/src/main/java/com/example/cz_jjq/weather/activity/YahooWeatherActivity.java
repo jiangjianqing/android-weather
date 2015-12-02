@@ -18,12 +18,16 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.cz_jjq.baselibrary.util.FileUtil;
 import com.example.cz_jjq.weather.R;
 import com.example.cz_jjq.weather.model.YahooWeatherContent;
 import com.example.cz_jjq.weather.service.YahooWeatherService;
 
+import java.util.List;
+
 public class YahooWeatherActivity extends AppCompatActivity {
 
+    private YahooWeatherContent weatherContent;
     private YahooWeatherService.DownloadBinder downloadBinder;
     private ServiceConnection serviceConnection=new ServiceConnection(){
         @Override
@@ -41,9 +45,11 @@ public class YahooWeatherActivity extends AppCompatActivity {
 
     private YahooWeatherService.DownloadListener downloadListener=new YahooWeatherService.DownloadListener() {
         @Override
-        public void downloadOk() {
+        public void downloadOk(List<YahooWeatherContent.YahooWeatherItem> list) {
+            weatherContent.setList(list);
             weatherItemArrayAdapter.notifyDataSetChanged();
-            showNotification(YahooWeatherContent.ITEMS.get(0));
+            FileUtil.saveObjToFile(YahooWeatherActivity.this, weatherContent, "yahoo_weather.obj");
+            showNotification(weatherContent.ITEMS.get(0));
         }
     };
 
@@ -70,21 +76,30 @@ public class YahooWeatherActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //立即下载天气
-                downloadBinder.downloadWeather("2137085",downloadListener);
+                downloadBinder.downloadWeather("2137085", downloadListener);
                 Snackbar.make(view, "开始下载天气数据", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
             }
         });
 
-        weatherListView=(ListView)findViewById(R.id.weather_list);
-        weatherItemArrayAdapter=new ArrayAdapter<YahooWeatherContent.YahooWeatherItem>(this
-                ,android.R.layout.simple_list_item_1,YahooWeatherContent.ITEMS);
-        weatherListView.setAdapter(weatherItemArrayAdapter);
-
         Intent activityIntent=getIntent();
         current_woeid=activityIntent.getStringExtra("woeid");
-        isFromNotification=activityIntent.getBooleanExtra("fromNotification",false);
+        isFromNotification=activityIntent.getBooleanExtra("fromNotification", false);
+
+        //如果是从Notification入口过来，则从文件加载
+        if (isFromNotification) {
+            weatherContent = FileUtil.loadObjFromFile(this, "yahoo_weather.obj", YahooWeatherContent.class);
+        }
+        if(weatherContent==null)
+            weatherContent=new YahooWeatherContent();
+
+
+        weatherListView=(ListView)findViewById(R.id.weather_list);
+        weatherItemArrayAdapter=new ArrayAdapter<YahooWeatherContent.YahooWeatherItem>(this
+                ,android.R.layout.simple_list_item_1,weatherContent.ITEMS);
+        weatherListView.setAdapter(weatherItemArrayAdapter);
+
 
         Intent serviceIntent=new Intent(this,YahooWeatherService.class);
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
